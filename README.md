@@ -56,3 +56,9 @@ services:
 ## Kubernetes example
 
 To do.
+
+# Contributors
+
+A big thanks to all the contributors!
+
+![contributor avatars](https://contrib.rocks/image?repo=Enrise/AppDashboard)
