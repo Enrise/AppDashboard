@@ -1,0 +1,178 @@
+#!/bin/bash
+# =========================================================
+# Taskfile gives you a set of quick tasks for your project
+# More info: https://github.com/Enrise/Taskfile
+# =========================================================
+
+function banner {
+	echo -e "${BLUE}"\
+	" ▗▄▖ ▗▄▄▖ ▗▄▄▖    ▗▄▄▄  ▗▄▖  ▗▄▄▖▗▖ ▗▖▗▄▄▖  ▗▄▖  ▗▄▖ ▗▄▄▖ ▗▄▄▄ \n"\
+	"▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌   ▐▌  █▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌▐▌  █\n"\
+	"▐▛▀▜▌▐▛▀▘ ▐▛▀▘    ▐▌  █▐▛▀▜▌ ▝▀▚▖▐▛▀▜▌▐▛▀▚▖▐▌ ▐▌▐▛▀▜▌▐▛▀▚▖▐▌  █\n"\
+	"▐▌ ▐▌▐▌   ▐▌      ▐▙▄▄▀▐▌ ▐▌▗▄▄▞▘▐▌ ▐▌▐▙▄▞▘▝▚▄▞▘▐▌ ▐▌▐▌ ▐▌▐▙▄▄▀${RESET}"
+}
+
+# =========================================================
+## Project
+# =========================================================
+
+function task:init { ## Initialise the project for local development
+	project:git-config
+	task:build
+	task:start
+	project:update
+	# Finalize setting up the project
+	task:help
+}
+
+function task:start { ## Start the project in development mode
+	docker:start
+}
+
+function task:update { ## Update all dependencies and files
+	project:update
+}
+
+function project:update {
+	title "Run project updates"
+	# TODO: Add project update commands here
+}
+
+function task:stop { ## Stop the local project
+	docker:stop
+}
+
+function task:restart { ## Restart the local project
+	docker:stop
+	docker:start
+}
+
+function project:git-config {
+	title "Setting git configuration"
+	git config --local core.hooksPath dev/git-hooks
+	echo -e "Git hooks directory is set to ${YELLOW}./dev/git-hooks${RESET}."
+}
+
+function task:pr { ## Check out pull request <number> and update
+	project:checkout-pr $1
+	project:update
+}
+
+function project:checkout-pr {
+	title "Checking out pull request"
+	if [ -z "$1" ]; then
+		echo "You need to provide a pull request number to check out."
+		echo -e "${BLUE}Usage:${RESET} $0 pr ${YELLOW}<number>${RESET}"
+		exit 1
+	fi
+	echo "Checking out pull request $1..."
+	git fetch origin refs/pull/$1/head:refs/remotes/origin/pr/$1
+	git checkout origin/pr/$1
+}
+
+# =========================================================
+## Docker
+# =========================================================
+
+function task:build { ## Build all docker compose containers
+	title "Building docker compose project"
+	dockercompose build
+}
+
+function docker:start {
+	title "Starting docker compose project"
+	dockercompose up --detach
+}
+
+function docker:stop {
+	title "Stopping docker compose project"
+	dockercompose down
+}
+
+function task:logs { ## Show the docker compose logs
+	title "Following local logs"
+	dockercompose logs --tail="20" --follow
+}
+
+function task:dc { ## Run docker compose command <command>
+	title "Docker compose $@"
+	dockercompose "$@"
+}
+
+function docker:assert-running {
+	if [ -z "$(dockercompose ps -q)" ]; then
+		echo -e "${RED}Oh noes, docker was not running yet, starting...${RESET}"
+		task:start
+		title "Resuming task"
+	fi
+}
+
+function dockercompose {
+	USERID=$USERID GROUPID=$GROUPID docker compose --file ./docker-compose.yml --project-name app-dashboard "$@"
+}
+
+# =========================================================
+# Utilities
+# =========================================================
+
+function file:ensure { # Abort if the desired file is not found
+	if [ ! -f $1 ]; then
+		echo -e "${RED}Missing required file: ${YELLOW}$1${RESET}"
+		exit 1
+	fi
+}
+
+function file:ensure-copy { # file:ensure-copy $COPY_TARGET $COPY_SOURCE
+    if [ ! -f $1 ]; then
+		cp $2 $1;
+		echo -e "Created copy of ${YELLOW}$2${RESET} to create ${GREEN}$1${RESET}.";
+	else
+		echo "${GREEN}$1${RESET} is present.";
+    fi
+}
+
+# =========================================================
+## Taskfile
+# =========================================================
+
+set -eo pipefail
+
+BLUE=$(printf '\033[36m')
+YELLOW=$(printf '\033[33m')
+RED=$(printf '\033[31m')
+GREEN=$(printf '\033[32m')
+RESET=$(printf '\033[0m')
+
+USERID=$(id -u)
+GROUPID=$(id -g)
+NETWORK="app-dashboard-network"
+
+function title {
+	echo -e "\n${BLUE}=>${RESET} $1\n"
+}
+
+function task:help { ## Show all available tasks
+	title "Available tasks"
+	awk 'BEGIN {FS = " { [#][#][ ]?"} /^([a-zA-Z_-]*:?.*)(\{ )?[#][#][ ]?/ \
+		{printf "\033[33m%-34s\033[0m %s\n", $1, $2}' $0 |\
+		sed -E "s/[#]{2,}[ ]*/${RESET}/g" |\
+		sed -E "s/function task:*/  /g"
+	echo -e "\n${BLUE}Usage:${RESET} $0 ${YELLOW}<task>${RESET} <args>"
+}
+
+function task:shorthand { ## Create CLI shorthand task instead of ./Taskfile
+	title "Creating task shorthand"
+	echo -e "You're about to create ${YELLOW}/usr/local/bin/task${RESET} that requires ${RED}root${RESET} permission..."
+	sudo curl --location --silent --output /usr/local/bin/task https://enri.se/taskfile-bin
+	sudo chmod +x /usr/local/bin/task
+	echo -e "${BLUE}You can now use:${RESET} task ${YELLOW}<task>${RESET} <args>"
+}
+
+banner
+if [[ ! "$(declare -F task:${@-help})" ]]; then
+	title "Task not found"
+	echo -e "Task ${YELLOW}$1${RESET} doesn't exist."
+	task:help
+	exit 1
+fi
+task:${@-help}

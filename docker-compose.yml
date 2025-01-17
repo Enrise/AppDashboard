@@ -1,0 +1,15 @@
+services:
+    dashboard:
+        build: .
+        container_name: dashboard
+        ports:
+            - '8000:8000'
+        volumes:
+            - '.:/opt/enrise/dashboard'
+        command: deno run -A --watch main.tsx
+        environment:
+            DASHBOARD_NAME: 'Local dashboard'
+            DASHBOARD_LINK_WEBSITE_NL: '/website-nl'
+            DASHBOARD_LINK_WEBSITE_EN: '/website-en'
+            DASHBOARD_LINK_CMS: '/cms'
+            DASHBOARD_LINK_MAIL: '/mailhog'
