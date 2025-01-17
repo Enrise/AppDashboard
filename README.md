@@ -29,11 +29,13 @@ container configuration.
 
 ## Docker
 
+The container uses port `8000` by default. In this example we will mount the web interface to port `3030` instead.
+
 ```shell
 docker run --rm -ti \
     --publish 3030:8000 \
-    --env DASHBOARD_NAME="Production build" \
-    --env DASHBOARD_LINK_DEVELOPMENT_SETUP="http://localhost:8000" \
+    --env DASHBOARD_NAME="Enrise production" \
+    --env DASHBOARD_LINK_ENRISE="https://enrise.com" \
     enrise/dashboard:latest
 ```
 
@@ -55,7 +57,69 @@ services:
 
 ## Kubernetes example
 
-To do.
+Running the dashboard container in kubernetes is easies with the kubernetes config. Open up the `kubectl deployment.yml` below.
+
+<details>
+  <summary>kubectl deployment.yml</summary>
+
+```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+        - image: enrise/dashboard:latest
+          name: dashboard
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "10m"
+            limits:
+              memory: "256Mi"
+              cpu: "100m"
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8000
+            successThreshold: 1
+            failureThreshold: 60
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            failureThreshold: 2
+            initialDelaySeconds: 60
+            periodSeconds: 60
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DASHBOARD_NAME
+              value: "Review application name"
+            - name: DASHBOARD_LINK_WEBSITE_NL
+              value: "https://nl.example.com"
+            - name: DASHBOARD_LINK_WEBSITE_EN
+              value: "https://en.example.com"
+```
+
+</details>
 
 # Contributors
 
