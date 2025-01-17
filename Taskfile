@@ -112,6 +112,31 @@ function dockercompose {
 }
 
 # =========================================================
+## Production
+# =========================================================
+
+function task:build-latest { ## Build the enrise/dashboard:latest container
+	title "Building the latest production container"
+	docker build --tag enrise/dashboard:latest .
+}
+
+function task:run-latest { ## Run the enrise/dashboard:latest container on port 3030
+	title "Running the latest production container"
+	echo "Running production container at ${GREEN}http://localhost:3030${RESET}.";
+	title "Container logs"
+	docker run --rm -ti \
+		--publish 3030:8000 \
+		--env DASHBOARD_NAME="Production build" \
+		--env DASHBOARD_LINK_DEVELOPMENT_SETUP="http://localhost:8000" \
+		enrise/dashboard:latest
+}
+
+function task:publish { ## Run the enrise/dashboard:latest container on port 3030
+	title "Publishing to the docker hub"
+	docker push enrise/dashboard:latest
+}
+
+# =========================================================
 # Utilities
 # =========================================================
 
@@ -171,7 +196,7 @@ function task:shorthand { ## Create CLI shorthand task instead of ./Taskfile
 banner
 if [[ ! "$(declare -F task:${@-help})" ]]; then
 	title "Task not found"
-	echo -e "Task ${YELLOW}$1${RESET} doesn't exist."
+	echo -e "Task ${RED}$1${RESET} doesn't exist."
 	task:help
 	exit 1
 fi

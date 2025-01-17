@@ -5,6 +5,6 @@
 # But include the followig
 
 !main.ts
-!deno.json
 !dashboard.html
 !dashboard.css
+!enrise.svg

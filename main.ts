@@ -32,8 +32,8 @@ const buildDashboardPage = (): string => {
 const buildStylesheet = (): string => {
 	let stylesheet = Deno.readTextFileSync('./dashboard.css');
 
-	stylesheet = stylesheet.replaceAll('$textColor', env('TEXT_COLOR', '#000000'));
-	stylesheet = stylesheet.replaceAll('$backgroundColor', env('BACKGROUND_COLOR', '#f29a00'));
+	stylesheet = stylesheet.replaceAll('var(text-color)', env('TEXT_COLOR', '#000000'));
+	stylesheet = stylesheet.replaceAll('var(background-color)', env('BACKGROUND_COLOR', '#f29a00'));
 
 	return stylesheet;
 };
@@ -59,6 +59,7 @@ Deno.serve((request: Request) => {
 		);
 	}
 
+	console.log(`Opened dashboard at %c${new Date().toLocaleTimeString()}%c.`, 'color: green', 'color: initial');
 	return new Response(
 		buildDashboardPage(),
 		{

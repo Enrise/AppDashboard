@@ -6,4 +6,4 @@ COPY . /opt/enrise/dashboard
 
 EXPOSE 8000
 
-CMD ["run", "-A", "main.tsx"]
+CMD ["run", "-A", "main.ts"]
