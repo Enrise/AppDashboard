@@ -11,7 +11,7 @@ const buildLinkList = (): string => {
 		.sort()
 		.forEach(function (name) {
 			if (name.startsWith(`${dashboardPrefix}LINK`)) {
-				const cleanName = name.replace(`${dashboardPrefix}LINK_`, '').replace('_', ' ');
+				const cleanName = name.replace(`${dashboardPrefix}LINK_`, '').replaceAll('_', ' ');
 				listItems.push(`<a href="${envs[name]}">${cleanName}</a>`);
 			}
 		});
