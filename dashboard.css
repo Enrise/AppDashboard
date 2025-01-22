@@ -28,7 +28,7 @@ h1 {
 	max-width: 30rem;
 	margin: 0 auto;
 	gap: 2rem;
-	height: 100dvh;
+	min-height: 100dvh;
 	padding: 2rem;
 	justify-content: center;
 }
