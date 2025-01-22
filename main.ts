@@ -16,7 +16,7 @@ const buildLinkList = (): string => {
 			}
 		});
 
-	return listItems.join('');
+	return listItems.join('\n\t\t\t\t');
 };
 
 const buildDashboardPage = (): string => {
