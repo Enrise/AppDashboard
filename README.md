@@ -20,6 +20,16 @@ container configuration.
 | `DASHBOARD_BACKGROUND_COLOR` | `"#f29a00"`                   | `"#000000"`                                  |
 | `DASHBOARD_LINK_<name>`      | None, add as many as you want | `DASHBOARD_LINK_GOOGLE="https://google.com"` |
 
+If you want more control over the order and naming of items, you can do something like this:
+
+| Environment variable | Value                                |
+| -------------------- | ------------------------------------ |
+| `DASHBOARD_LINK_00`  | `/website-nl\|Website NL at the top` |
+| `DASHBOARD_LINK_01`  | `/website-nl\|Website EN after that` |
+| `DASHBOARD_LINK_02`  | `/cms\|CMS at the bottom`            |
+
+This way the order is based on the key but for the name anything after `|` in the value is used.
+
 ## Preview
 
 | Default config                     | Custom config                       |

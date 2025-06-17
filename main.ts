@@ -11,8 +11,14 @@ const buildLinkList = (): string => {
 		.sort()
 		.forEach(function (name) {
 			if (name.startsWith(`${dashboardPrefix}LINK`)) {
-				const cleanName = name.replace(`${dashboardPrefix}LINK_`, '').replaceAll('_', ' ');
-				listItems.push(`<a href="${envs[name]}">${cleanName}</a>`);
+				let link = envs[name];
+				let cleanName = name.replace(`${dashboardPrefix}LINK_`, '').replaceAll('_', ' ').toLowerCase();
+				if (envs[name].includes('|')) {
+					const parts  = envs[name].split('|');
+					link = parts[0];
+					cleanName = parts[1];
+				}
+				listItems.push(`<a href="${link}">${cleanName}</a>`);
 			}
 		});
 
