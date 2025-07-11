@@ -26,7 +26,7 @@ const buildLinkList = (): string => {
 };
 
 const buildDashboardPage = (): string => {
-	let page = Deno.readTextFileSync('./dashboard.html');
+	let page = Deno.readTextFileSync('./resources/dashboard.html');
 
 	page = page.replaceAll('$projectImage', env('IMAGE', '/enrise.svg'));
 	page = page.replaceAll('$projectName', env('NAME', 'Dashboard'));
@@ -36,7 +36,7 @@ const buildDashboardPage = (): string => {
 };
 
 const buildStylesheet = (): string => {
-	let stylesheet = Deno.readTextFileSync('./dashboard.css');
+	let stylesheet = Deno.readTextFileSync('./resources/dashboard.css');
 
 	stylesheet = stylesheet.replaceAll('var(text-color)', env('TEXT_COLOR', '#000000'));
 	stylesheet = stylesheet.replaceAll('var(background-color)', env('BACKGROUND_COLOR', '#f29a00'));
@@ -57,7 +57,7 @@ Deno.serve((request: Request) => {
 
 	if (request.url.includes('.svg')) {
 		return new Response(
-			Deno.readTextFileSync('./enrise.svg'),
+			Deno.readTextFileSync('./resources/enrise.svg'),
 			{
 				status: 200,
 				headers: { 'content-type': 'image/svg+xml' },
@@ -66,6 +66,7 @@ Deno.serve((request: Request) => {
 	}
 
 	console.log(`Opened dashboard at %c${new Date().toLocaleTimeString()}%c.`, 'color: green', 'color: initial');
+
 	return new Response(
 		buildDashboardPage(),
 		{

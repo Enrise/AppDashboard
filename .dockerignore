@@ -5,6 +5,4 @@
 # But include the followig
 
 !main.ts
-!dashboard.html
-!dashboard.css
-!enrise.svg
+!resources/

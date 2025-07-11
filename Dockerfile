@@ -1,9 +1,15 @@
-FROM denoland/deno:latest AS base
+# ==================================
+# Base stage
+# ==================================
+
+FROM denoland/deno:latest
+
+USER deno
+
+EXPOSE 8000
 
 WORKDIR /opt/enrise/dashboard
 
 COPY . /opt/enrise/dashboard
 
-EXPOSE 8000
-
-CMD ["run", "-A", "main.ts"]
+CMD ["run", "--allow-read", "--allow-net", "--allow-env", "main.ts"]
