@@ -93,6 +93,9 @@ spec:
       labels:
         app: dashboard
     spec:
+      securityContext:
+        runAsUser: 1993
+        runAsNonRoot: true
       containers:
         - image: enrise/dashboard:latest
           name: dashboard
@@ -118,6 +121,9 @@ spec:
             failureThreshold: 2
             initialDelaySeconds: 60
             periodSeconds: 60
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 8000
           env:
