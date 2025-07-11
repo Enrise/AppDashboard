@@ -1,7 +1,3 @@
-# ==================================
-# Base stage
-# ==================================
-
 FROM denoland/deno:latest
 
 USER deno
