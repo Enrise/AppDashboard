@@ -59,7 +59,13 @@ a:first-letter {
 	text-transform: uppercase !important;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 22rem) {
+	img {
+		width: 18.2rem;
+	}
+}
+
+@media (min-width: 36rem) {
 	h1 {
 		font-size: 1.8rem;
 	}
@@ -69,8 +75,20 @@ a:first-letter {
 	}
 }
 
-@media (min-width: 400px) {
-	img {
-		width: 70%;
+@media (min-width: 60rem) {
+	.container {
+		width: 57rem;
+		max-width: unset;
+	}
+
+	.link-list {
+		align-items: center;
+		max-width: 53rem;
+		max-height: 40rem;
+		flex-wrap: wrap;
+	}
+
+	a {
+		width: 26rem;
 	}
 }
