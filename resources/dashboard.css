@@ -83,8 +83,10 @@ a:first-letter {
 
 	.link-list {
 		align-items: center;
-		max-width: 53rem;
-		max-height: 40rem;
+	}
+
+	.link-list:has(> :nth-child(9)) {
+		flex-direction: row;
 		flex-wrap: wrap;
 	}
 
