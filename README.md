@@ -7,6 +7,8 @@ application links could be.
 No more, with the Enrise App Dashboard you add a simple dashboard page to your cloud within minutes, with just simple
 adding some environment variables to configure it.
 
+![App Dashboard Review Applications](./examples/review-apps.gif)
+
 ## Configuration
 
 All configuration is done via environment variables. Add the desired configuration environment variables to your
