@@ -1,0 +1,101 @@
+name: Build and Test Container
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-test-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image for testing
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: test-image:latest
+        load: true
+
+    - name: Test container
+      run: |
+        # Start container in background with test environment variables
+        docker run --detach --name test-container --publish 8000:8000 \
+          --env DASHBOARD_NAME="Test Environment" \
+          --env DASHBOARD_LINK_00="/app1|Zebra Application" \
+          --env DASHBOARD_LINK_01="/app2|Apple Application" \
+          --env DASHBOARD_LINK_02="/app3|Banana Application" \
+          --env DASHBOARD_LINK_CUSTOM_NAME="/custom|Mango Named Link" \
+          test-image:latest
+        
+        # Wait for container to start
+        while ! nc -z localhost 8000; do sleep 1; done
+        
+        # Check if container is NOT running as root
+        USER_ID=$(docker exec test-container id --user)
+        if [ "$USER_ID" = "0" ]; then
+          echo "ERROR: Container is running as root (UID 0) - this is not allowed"
+          docker stop test-container
+          docker rm test-container
+          exit 1
+        fi
+        echo "✓ Container is running as non-root user (UID: $USER_ID)"
+        
+        # Test HTTP response contains "Enrise"
+        RESPONSE=$(curl --silent http://localhost:8000 || echo "FAILED")
+        if echo "$RESPONSE" | grep "Enrise" > /dev/null; then
+          echo "✓ HTTP response contains 'Enrise'"
+        else
+          echo "ERROR: HTTP response does not contain 'Enrise'"
+          echo "Response: $RESPONSE"
+          docker stop test-container
+          docker rm test-container
+          exit 1
+        fi
+        
+        # Test that links are rendered in the correct order (Zebra, Apple, Banana - not alphabetical!)
+        if echo "$RESPONSE" | tr --delete '\n' | grep --quiet --extended-regexp "Zebra Application.*Apple Application.*Banana Application" > /dev/null; then
+          echo "✓ Links are rendered in correct numerical order (not alphabetical)"
+        else
+          echo "ERROR: Links are not in the expected numerical order"
+          echo "Response: $RESPONSE"
+          docker stop test-container
+          docker rm test-container
+          exit 1
+        fi
+        
+        # Test that custom names are displayed (not the keys)
+        if echo "$RESPONSE" | grep "Mango Named Link" > /dev/null; then
+          echo "✓ Custom link names are displayed"
+        else
+          echo "ERROR: Custom link names are not displayed properly"
+          echo "Response: $RESPONSE"
+          docker stop test-container
+          docker rm test-container
+          exit 1
+        fi
+        
+        # Cleanup
+        docker stop test-container
+        docker rm test-container
+
+    - name: Log in to Docker Hub
+      if: github.repository == 'Enrise/AppDashboard' && github.ref == 'refs/heads/production'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Retag and push Docker image
+      if: github.repository == 'Enrise/AppDashboard' && github.ref == 'refs/heads/production'
+      run: |
+        docker tag test-image:latest enrise/dashboard:latest
+        docker push enrise/dashboard:latest
