@@ -1,4 +1,4 @@
-FROM denoland/deno:2.6.1
+FROM denoland/deno:2.6.2
 
 USER deno
 
